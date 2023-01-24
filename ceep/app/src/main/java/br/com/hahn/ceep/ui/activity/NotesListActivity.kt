@@ -45,7 +45,7 @@ class NotesListActivity : AppCompatActivity() {
         configRecyclerView()
         lifecycleScope.launch {
              val notes = webClient.findAll()
-            Log.i("Get", "Retrofit OPAOAPAOAPAOAPAOAPAOA $notes")
+            Log.i("Get", "Retrofit: $notes")
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 getNotes()
             }
