@@ -14,7 +14,9 @@ import br.com.hahn.ceep.databinding.ActivityNotesListBinding
 import br.com.hahn.ceep.extensions.navigate
 import br.com.hahn.ceep.model.Note
 import br.com.hahn.ceep.ui.recyclerview.adapter.ListaNotasAdapter
+import br.com.hahn.ceep.webclient.NoteWebClient
 import br.com.hahn.ceep.webclient.RetrofitInitialize
+import br.com.hahn.ceep.webclient.model.NoteResponse
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import retrofit2.Call
@@ -32,6 +34,9 @@ class NotesListActivity : AppCompatActivity() {
     private val dao by lazy {
         AppDatabase.getInstance(this).noteDao()
     }
+    private val webClient by lazy {
+        NoteWebClient()
+    }
 
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,15 +44,10 @@ class NotesListActivity : AppCompatActivity() {
         handleFab()
         configRecyclerView()
         lifecycleScope.launch {
+             val notes = webClient.findAll()
+            Log.i("Get", "Retrofit OPAOAPAOAPAOAPAOAPAOA $notes")
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 getNotes()
-            }
-        }
-        val call : Call<List<Note>> = RetrofitInitialize().service.findAll()
-        lifecycleScope.launch(IO) {
-            val response : Response<List<Note>> = call.execute()
-            response.body()?.let { notes ->
-                Log.i("Get" , "onCreate: $notes")
             }
         }
     }
