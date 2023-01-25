@@ -1,6 +1,7 @@
 package br.com.hahn.ceep.webclient.model
 
 import br.com.hahn.ceep.model.Note
+import java.util.*
 
 class NoteResponse (
     val id: String? ,
@@ -9,7 +10,7 @@ class NoteResponse (
     val imagem: String?
         ){
     val note : Note get() = Note(
-        id = 0 ,
+        id = id?: UUID.randomUUID().toString(),
         title = titulo ?:"",
         description = descricao ?: "",
         image = imagem ?: ""
