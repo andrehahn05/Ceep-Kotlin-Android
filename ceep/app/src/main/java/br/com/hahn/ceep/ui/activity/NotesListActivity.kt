@@ -2,7 +2,6 @@ package br.com.hahn.ceep.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
@@ -12,16 +11,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import br.com.hahn.ceep.database.AppDatabase
 import br.com.hahn.ceep.databinding.ActivityNotesListBinding
 import br.com.hahn.ceep.extensions.navigate
-import br.com.hahn.ceep.model.Note
+import br.com.hahn.ceep.repository.NoteRepository
 import br.com.hahn.ceep.ui.recyclerview.adapter.ListaNotasAdapter
 import br.com.hahn.ceep.webclient.NoteWebClient
-import br.com.hahn.ceep.webclient.RetrofitInitialize
-import br.com.hahn.ceep.webclient.model.NoteResponse
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Response
-import retrofit2.Retrofit
 
 class NotesListActivity : AppCompatActivity() {
 
@@ -31,11 +24,11 @@ class NotesListActivity : AppCompatActivity() {
     private val adapter by lazy {
         ListaNotasAdapter(this)
     }
-    private val dao by lazy {
-        AppDatabase.getInstance(this).noteDao()
-    }
-    private val webClient by lazy {
-        NoteWebClient()
+    private val repository by lazy {
+        NoteRepository(
+            AppDatabase.getInstance(this).noteDao(),
+            NoteWebClient()
+        )
     }
 
     override fun onCreate(savedInstanceState : Bundle?) {
@@ -44,14 +37,14 @@ class NotesListActivity : AppCompatActivity() {
         handleFab()
         configRecyclerView()
         lifecycleScope.launch {
-             val notes = webClient.findAll()
-            Log.i("Get", "Retrofit: $notes")
+            launch {
+                repository.refresh()
+            }
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 getNotes()
             }
         }
     }
-
 
     private fun handleFab() {
         binding.activityListNotesFab.setOnClickListener {
@@ -71,7 +64,8 @@ class NotesListActivity : AppCompatActivity() {
     }
 
     private suspend fun getNotes() {
-        dao.findAll().collect { foundNotes ->
+        repository.findAll()
+            .collect { foundNotes ->
                 binding.activityListOfEmptyNotes.visibility = if (foundNotes.isEmpty()) {
                     binding.activityListNotesRecyclerview.visibility = GONE
                     VISIBLE
