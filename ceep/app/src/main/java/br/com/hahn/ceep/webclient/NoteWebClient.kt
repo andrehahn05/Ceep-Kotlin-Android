@@ -3,13 +3,18 @@ package br.com.hahn.ceep.webclient
 import android.util.Log
 import br.com.hahn.ceep.model.Note
 import br.com.hahn.ceep.webclient.model.NoteResponse
-import retrofit2.Call
-import retrofit2.Response
+
+private const val TAG = "NoteWebClient"
 
 class NoteWebClient {
-    suspend fun findAll(): List<Note> {
-        val noteResponse = RetrofitInitialize().service.findAll()
-        return noteResponse.map(NoteResponse::note)
-
+    suspend fun findAll() : List<Note>? {
+        return try {
+            val noteResponse = RetrofitInitialize().service.findAll()
+            return noteResponse.map(NoteResponse::note)
+        }
+        catch (e : Exception) {
+            Log.e(TAG, "findAll",e)
+            null
         }
     }
+}
