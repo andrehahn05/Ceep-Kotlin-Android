@@ -30,5 +30,6 @@ class NoteRepository(
 
     suspend fun save(note : Note) {
         dao.save(note)
+        webClient.save(note)
     }
 }

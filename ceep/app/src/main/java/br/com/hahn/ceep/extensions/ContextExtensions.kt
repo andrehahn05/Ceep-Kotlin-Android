@@ -2,6 +2,7 @@ package br.com.hahn.ceep.extensions
 
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 
 fun Context.navigate(
     clazz: Class<*>,
@@ -11,4 +12,12 @@ fun Context.navigate(
         intent()
         startActivity(this)
     }
+}
+
+fun Context.toast(mensagem: String) {
+    Toast.makeText(
+        this,
+        mensagem,
+        Toast.LENGTH_SHORT
+    ).show()
 }
