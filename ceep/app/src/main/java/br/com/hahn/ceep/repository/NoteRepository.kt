@@ -20,4 +20,15 @@ class NoteRepository(
         }
     }
 
+    fun findById(id : String) : Flow<Note> {
+        return dao.findById(id)
+    }
+
+    suspend fun remove(id : String) {
+        dao.remove(id)
+    }
+
+    suspend fun save(note : Note) {
+        dao.save(note)
+    }
 }

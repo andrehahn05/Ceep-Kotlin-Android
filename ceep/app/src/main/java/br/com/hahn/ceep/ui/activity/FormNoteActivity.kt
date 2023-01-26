@@ -12,7 +12,9 @@ import br.com.hahn.ceep.database.AppDatabase
 import br.com.hahn.ceep.databinding.ActivityFormNoteBinding
 import br.com.hahn.ceep.extensions.tryLoadImage
 import br.com.hahn.ceep.model.Note
+import br.com.hahn.ceep.repository.NoteRepository
 import br.com.hahn.ceep.ui.dialog.FormImageDialog
+import br.com.hahn.ceep.webclient.NoteWebClient
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -22,8 +24,11 @@ class FormNoteActivity : AppCompatActivity() {
         ActivityFormNoteBinding.inflate(layoutInflater)
     }
     private var image : MutableStateFlow<String?> = MutableStateFlow(null)
-    private val dao by lazy {
-        AppDatabase.getInstance(this).noteDao()
+    private  val repository by lazy {
+        NoteRepository(
+            AppDatabase.getInstance(this).noteDao(),
+            NoteWebClient()
+        )
     }
     private var noteId : String? = null
 
@@ -56,7 +61,7 @@ class FormNoteActivity : AppCompatActivity() {
 
     private suspend fun getNote() {
         noteId?.let { id ->
-            dao.findById(id).filterNotNull().collect { foundNote ->
+             repository.findById(id).filterNotNull().collect { foundNote ->
                 noteId = foundNote.id
                 image.value = foundNote.image
                 binding.activityFormNoteTitle.setText(foundNote.title)
@@ -99,7 +104,7 @@ class FormNoteActivity : AppCompatActivity() {
     private fun remove() {
         lifecycleScope.launch {
             noteId?.let { id ->
-                dao.remove(id)
+                repository.remove(id)
             }
             finish()
         }
@@ -108,7 +113,7 @@ class FormNoteActivity : AppCompatActivity() {
     private fun add() {
         val note = createNote()
         lifecycleScope.launch {
-            dao.save(note)
+            repository.save(note)
             finish()
         }
     }
