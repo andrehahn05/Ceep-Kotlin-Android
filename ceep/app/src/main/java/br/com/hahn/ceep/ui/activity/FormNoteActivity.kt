@@ -21,13 +21,13 @@ class FormNoteActivity : AppCompatActivity() {
     private val binding by lazy {
         ActivityFormNoteBinding.inflate(layoutInflater)
     }
-    private var image: MutableStateFlow<String?> = MutableStateFlow(null)
+    private var image : MutableStateFlow<String?> = MutableStateFlow(null)
     private val dao by lazy {
         AppDatabase.getInstance(this).noteDao()
     }
-    private var noteId: String? = null
+    private var noteId : String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         setSupportActionBar(binding.activityFormNoteToolbar)
@@ -38,35 +38,30 @@ class FormNoteActivity : AppCompatActivity() {
                 getNote()
             }
             launch {
-                configuraCarregamentoDeImagem()
+                handleImageUpload()
             }
         }
-
     }
 
-    private suspend fun configuraCarregamentoDeImagem() {
+    private suspend fun handleImageUpload() {
         val imageNote = binding.activityFormNoteImage
         image.collect { newImage ->
-            imageNote.visibility =
-                if (newImage.isNullOrBlank())
-                    GONE
-                else {
-                    imageNote.tryLoadImage(newImage)
-                    VISIBLE
-                }
+            imageNote.visibility = if (newImage.isNullOrBlank()) GONE
+            else {
+                imageNote.tryLoadImage(newImage)
+                VISIBLE
+            }
         }
     }
 
     private suspend fun getNote() {
         noteId?.let { id ->
-            dao.findById(id)
-                .filterNotNull()
-                .collect { foundNote ->
-                    noteId = foundNote.id
-                    image.value = foundNote.image
-                    binding.activityFormNoteTitle.setText(foundNote.title)
-                    binding.activityFormNoteDescription.setText(foundNote.description)
-                }
+            dao.findById(id).filterNotNull().collect { foundNote ->
+                noteId = foundNote.id
+                image.value = foundNote.image
+                binding.activityFormNoteTitle.setText(foundNote.title)
+                binding.activityFormNoteDescription.setText(foundNote.description)
+            }
         }
     }
 
@@ -76,25 +71,24 @@ class FormNoteActivity : AppCompatActivity() {
 
     private fun changeImage() {
         binding.activityFormNoteAddImage.setOnClickListener {
-            FormImageDialog(this)
-                .showOff(image.value) { uploadedImage ->
-                    binding.activityFormNoteImage
-                        .tryLoadImage(uploadedImage)
-                    image.value = uploadedImage
-                }
+            FormImageDialog(this).showOff(image.value) { uploadedImage ->
+                binding.activityFormNoteImage.tryLoadImage(uploadedImage)
+                image.value = uploadedImage
+            }
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.form_note_menu, menu)
+    override fun onCreateOptionsMenu(menu : Menu?) : Boolean {
+        menuInflater.inflate(R.menu.form_note_menu , menu)
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item : MenuItem) : Boolean {
         when (item.itemId) {
             R.id.form_note_menu_save -> {
                 add()
             }
+
             R.id.form_note_menu_remove -> {
                 remove()
             }
@@ -104,7 +98,7 @@ class FormNoteActivity : AppCompatActivity() {
 
     private fun remove() {
         lifecycleScope.launch {
-            noteId?.let {  id  ->
+            noteId?.let { id ->
                 dao.remove(id)
             }
             finish()
@@ -114,28 +108,20 @@ class FormNoteActivity : AppCompatActivity() {
     private fun add() {
         val note = createNote()
         lifecycleScope.launch {
-            note?.let {
-                dao.save(note)
-            }
+            dao.save(note)
             finish()
         }
     }
 
-    private fun createNote(): Note? {
+    private fun createNote() : Note {
         val title = binding.activityFormNoteTitle.text.toString()
         val description = binding.activityFormNoteDescription.text.toString()
         return noteId?.let { id ->
             Note(
-                id = id,
-                title = title,
-                description = description,
-                image = image.value
-            )?: Note(
-                title = title,
-                description = description,
-                image = image.value
+                id = id , title = title , description = description , image = image.value
             )
-        }
+        } ?: Note(
+            title = title , description = description , image = image.value
+        )
     }
-
 }
