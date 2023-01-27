@@ -13,5 +13,7 @@ data class Note(
     val description : String ,
     val image : String? = null,
     @ColumnInfo(defaultValue = "0")
-    val synchronize : Boolean = false
+    val synchronize : Boolean = false,
+    @ColumnInfo(defaultValue = "0")
+    val disabled : Boolean = false
 )

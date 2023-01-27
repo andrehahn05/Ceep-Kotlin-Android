@@ -4,6 +4,7 @@ import br.com.hahn.ceep.database.dao.NoteDao
 import br.com.hahn.ceep.model.Note
 import br.com.hahn.ceep.webclient.NoteWebClient
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 class NoteRepository(
     private val dao : NoteDao ,
@@ -14,9 +15,12 @@ class NoteRepository(
         return dao.findAll()
     }
 
-    suspend fun refresh() {
+    private suspend fun refresh() {
         webClient.findAll()?.let { notes ->
-            dao.add(notes)
+            val noteSynced = notes.map { note ->
+                note.copy(synchronize = true)
+            }
+            dao.add(noteSynced)
         }
     }
 
@@ -26,10 +30,22 @@ class NoteRepository(
 
     suspend fun remove(id : String) {
         dao.remove(id)
+        webClient.remove(id)
     }
 
     suspend fun save(note : Note) {
         dao.save(note)
-        webClient.save(note)
+       if(webClient.save(note)){
+          val synchronizedNote = note.copy(synchronize = true)
+           dao.save(synchronizedNote)
+       }
+    }
+
+    suspend fun synchronize() {
+        val notSynchronized = dao.findNotSynchronized().first()
+        notSynchronized.forEach { synced ->
+            save(synced)
+        }
+        refresh()
     }
 }

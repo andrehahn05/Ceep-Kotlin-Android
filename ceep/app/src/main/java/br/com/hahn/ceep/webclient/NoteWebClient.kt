@@ -8,7 +8,7 @@ import br.com.hahn.ceep.webclient.services.NoteService
 
 
 private const val TAG = "WebClient"
-private  val noteService: NoteService = RetrofitInitialize().service
+private val noteService : NoteService = RetrofitInitialize().service
 
 class NoteWebClient {
     suspend fun findAll() : List<Note>? {
@@ -17,28 +17,36 @@ class NoteWebClient {
             return noteResponse.map(NoteResponse::note)
         }
         catch (e : Exception) {
-            Log.e(TAG, "findAll",e)
+            Log.e(TAG , "findAll" , e)
             null
         }
     }
 
-    suspend fun save(note : Note) {
+    suspend fun save(note : Note) : Boolean {
         try {
-            val res = noteService.save(note.id, NoteRequest(
-                titulo = note.title,
-                descricao = note.description,
-                imagem = note.image
-            ))
-            if(res.isSuccessful) {
-                Log.i(TAG,"Nota salva com sucesso!!!")
-            } else {
-                Log.i(TAG,"Falha ao tentar salvar")
-            }
+            val res = noteService.save(
+                note.id , NoteRequest(
+                    titulo = note.title ,
+                    descricao = note.description ,
+                    imagem = note.image
+                )
+            )
+            return res.isSuccessful
         }
         catch (e : Exception) {
-            Log.e(TAG,"Falha ao tentar salvar", e)
+            Log.e(TAG , "Falha ao tentar salvar" , e)
         }
+        return false
     }
 
-
+    suspend fun remove(id : String): Boolean {
+        try {
+            val res = noteService.remove(id)
+            return res.isSuccessful
+        }
+        catch (e : Exception) {
+            Log.e(TAG , "Falha ao tentar remover a nota" , e)
+        }
+        return false
+    }
 }

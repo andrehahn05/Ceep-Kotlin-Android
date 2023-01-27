@@ -38,12 +38,16 @@ class NotesListActivity : AppCompatActivity() {
         configRecyclerView()
         lifecycleScope.launch {
             launch {
-                repository.refresh()
+                synchronize()
             }
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 getNotes()
             }
         }
+    }
+
+    private suspend fun synchronize() {
+        repository.synchronize()
     }
 
     private fun handleFab() {
