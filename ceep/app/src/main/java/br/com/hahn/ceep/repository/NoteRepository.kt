@@ -29,8 +29,10 @@ class NoteRepository(
     }
 
     suspend fun remove(id : String) {
-        dao.remove(id)
-        webClient.remove(id)
+        dao.disabled(id)
+       if(webClient.remove(id)) {
+           dao.remove(id)
+       }
     }
 
     suspend fun save(note : Note) {
