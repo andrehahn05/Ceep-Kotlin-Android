@@ -11,7 +11,7 @@ private const val TAG = "WebClient"
 private val noteService : NoteService = RetrofitInitialize().service
 
 class NoteWebClient {
-    suspend fun findAll() : List<Note>? {
+    suspend fun  findAll() : List<Note>? {
         return try {
             val noteResponse = noteService.findAll()
             return noteResponse.map(NoteResponse::note)
@@ -41,8 +41,8 @@ class NoteWebClient {
 
     suspend fun remove(id : String): Boolean {
         try {
-            val res = noteService.remove(id)
-            return res.isSuccessful
+            noteService.remove(id)
+            return true
         }
         catch (e : Exception) {
             Log.e(TAG , "Falha ao tentar remover a nota" , e)

@@ -44,6 +44,10 @@ class NoteRepository(
     }
 
     suspend fun synchronize() {
+        val disabledNote = dao.findByDisabled().first()
+        disabledNote.forEach { disabled ->
+            remove(disabled.id)
+        }
         val notSynchronized = dao.findNotSynchronized().first()
         notSynchronized.forEach { synced ->
             save(synced)
